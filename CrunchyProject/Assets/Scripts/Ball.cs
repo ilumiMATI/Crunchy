@@ -10,8 +10,9 @@ public class Ball : MonoBehaviour
     [SerializeField] float rotationSpeed = 180f;
     [SerializeField] AudioClip[] ballClips;
     [SerializeField] float randomBounceFactor = 0f;
-    private int wallHitCount = 0;
     [SerializeField] GameObject redirectObject;
+    private int wallHitCount = 0;
+    private float velocity;
 
     // State
     Vector2 paddleToBallVector;
@@ -29,6 +30,7 @@ public class Ball : MonoBehaviour
         myAudioSource = GetComponent<AudioSource>();
         myRigidBody2D = GetComponent<Rigidbody2D>();
         myGameSession = FindObjectOfType<GameSession>();
+        velocity = pushVector.magnitude;
     }
 
     // Update is called once per frame
@@ -52,7 +54,7 @@ public class Ball : MonoBehaviour
         {
             myRigidBody2D.velocity = new Vector2(pushVector.x, pushVector.y);
             hasStarted = true;
-            InvokeRepeating("CheckBallMovement", 1f, 1f);
+            //InvokeRepeating("CheckBallMovement", 1f, 1f); // Checking ball movement every second
         }
     }
 
@@ -64,19 +66,26 @@ public class Ball : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Vector2 velocityRandomizedAddon = new Vector2(Random.Range(-randomBounceFactor, randomBounceFactor), Random.Range(-randomBounceFactor, randomBounceFactor));
-
-        AudioClip clip = ballClips[Random.Range(0, ballClips.Length)];
+        
         if (hasStarted)
         {
+            Vector2 velocityRandomizedAddon = new Vector2(
+                Random.Range(-randomBounceFactor, randomBounceFactor),
+                Random.Range(-randomBounceFactor, randomBounceFactor));
+            AudioClip clip = ballClips[Random.Range(0, ballClips.Length)];
+
             myAudioSource.PlayOneShot(clip);
-            myRigidBody2D.velocity += velocityRandomizedAddon;
+            myRigidBody2D.velocity = (myRigidBody2D.velocity + velocityRandomizedAddon).normalized * velocity;
         }
         if (collision.gameObject.CompareTag("Wall"))
         {
             wallHitCount++;
             Invoke("CheckBallMovement", 0.1f);
-        } else if (collision.gameObject.CompareTag("Untagged")) { }
+        } 
+        else if (collision.gameObject.CompareTag("Untagged")) 
+        { 
+            // Skip
+        }
         else
         {
             wallHitCount = 0;
