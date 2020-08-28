@@ -11,6 +11,7 @@ public class Ball : MonoBehaviour
     [SerializeField] AudioClip[] ballClips;
     [SerializeField] float randomBounceFactor = 0f;
     [SerializeField] GameObject redirectObject;
+    [SerializeField] int wallHitsToSpawnRedirect = 3;
     private int wallHitCount = 0;
     private float velocity;
 
@@ -22,6 +23,11 @@ public class Ball : MonoBehaviour
     AudioSource myAudioSource;
     Rigidbody2D myRigidBody2D;
     GameSession myGameSession;
+
+    //private void ShowDebugInfo()
+    //{
+    //    Debug.Log("Ball velocity: " + myRigidBody2D.velocity.magnitude);
+    //}
 
     // Start is called before the first frame update
     void Start()
@@ -46,6 +52,11 @@ public class Ball : MonoBehaviour
     private void FixedUpdate()
     {
         myRigidBody2D.angularVelocity = rotationSpeed;
+        //FixBallVelocity(); not optimal solution for constant velocity or is it?
+    }
+    private void FixBallVelocity()
+    {
+        myRigidBody2D.velocity = myRigidBody2D.velocity.normalized * velocity;
     }
 
     private void LaunchOnMouseClick()
@@ -54,7 +65,7 @@ public class Ball : MonoBehaviour
         {
             myRigidBody2D.velocity = new Vector2(pushVector.x, pushVector.y);
             hasStarted = true;
-            //InvokeRepeating("CheckBallMovement", 1f, 1f); // Checking ball movement every second
+            //InvokeRepeating("ShowDebugInfo", 1f, 0.2f); // Checking ball movement every second
         }
     }
 
@@ -75,7 +86,9 @@ public class Ball : MonoBehaviour
             AudioClip clip = ballClips[Random.Range(0, ballClips.Length)];
 
             myAudioSource.PlayOneShot(clip);
-            myRigidBody2D.velocity = (myRigidBody2D.velocity + velocityRandomizedAddon).normalized * velocity;
+            myRigidBody2D.velocity += velocityRandomizedAddon;
+            FixBallVelocity();
+            Invoke("FixBallVelocity", 0.1f); // Making sure wrong velocity doesn't last
         }
         if (collision.gameObject.CompareTag("Wall"))
         {
@@ -94,7 +107,7 @@ public class Ball : MonoBehaviour
 
     private void CheckBallMovement()
     {
-        if (wallHitCount > 2 && myRigidBody2D.velocity.y < myGameSession.GetMinimumBallSpeedPerUnit())
+        if (wallHitCount >= wallHitsToSpawnRedirect && myRigidBody2D.velocity.y < myGameSession.GetMinimumBallSpeedPerUnit())
         {
             SpawnHorizontalRedirect();
             wallHitCount = 0;
