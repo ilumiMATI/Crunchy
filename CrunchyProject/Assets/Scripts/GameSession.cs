@@ -68,4 +68,8 @@ public class GameSession : MonoBehaviour
     {
         return minBallSpeedPerUnit;
     }
+    public int GetCurrentScore()
+    {
+        return currentScore;
+    }
 }
