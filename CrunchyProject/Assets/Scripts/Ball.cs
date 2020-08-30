@@ -34,10 +34,8 @@ public class Ball : MonoBehaviour
         myAudioSource = GetComponent<AudioSource>();
         myRigidBody2D = GetComponent<Rigidbody2D>();
         myGameSession = FindObjectOfType<GameSession>();
-        //velocity = pushVector.magnitude;
         pushVectorSmudge = Instantiate(pushVectorSmudge, transform.position + new Vector3(pushVectorSmudgeOffset.x,pushVectorSmudgeOffset.y), transform.rotation);
-        pushVectorSmudge.transform.parent = transform;
-        
+        pushVectorSmudge.transform.parent = transform; 
     }
 
     // Update is called once per frame
@@ -48,8 +46,14 @@ public class Ball : MonoBehaviour
         {
             LockBallToPaddle();
             LaunchOnMouseClick();
-            pushVectorSmudge.transform.RotateAround(transform.position, Vector3.forward, 360 * Time.deltaTime);
+            HandlePushVector();
         }
+    }
+
+    private void HandlePushVector()
+    {
+        pushVectorSmudge.transform.RotateAround(transform.position, Vector3.forward, -rotationSpeed * Time.deltaTime + 60f * Time.deltaTime);
+        pushVector = Redirect.RotateVector2(pushVector, 60f * Mathf.Deg2Rad * Time.deltaTime);
     }
 
     private void FixedUpdate()
@@ -65,7 +69,7 @@ public class Ball : MonoBehaviour
     {
         if(Input.GetMouseButtonDown(0))
         {
-            myRigidBody2D.velocity = new Vector2(pushVector.x, pushVector.y);
+            myRigidBody2D.velocity = pushVector * velocity;
             hasStarted = true;
             pushVectorSmudge.SetActive(false);
         }
