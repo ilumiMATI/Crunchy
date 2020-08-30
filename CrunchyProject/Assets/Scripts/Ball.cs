@@ -6,14 +6,19 @@ public class Ball : MonoBehaviour
 {
     // Configuration variables
     [SerializeField] Paddle paddle;
-    [SerializeField] Vector2 pushVector;
+    private Vector2 pushVector = Vector2.up;
+    [SerializeField] float velocity;
+    [SerializeField] GameObject pushVectorSmudge;
+    [SerializeField] float periodicRotateFrequency = 1f;
+    [SerializeField] float periodicRotateAmplitude = 1f;
+    [SerializeField] Vector2 pushVectorSmudgeOffset;
     [SerializeField] float rotationSpeed = 180f;
     [SerializeField] AudioClip[] ballClips;
     [SerializeField] float randomBounceFactor = 0f;
     [SerializeField] GameObject redirectObject;
     [SerializeField] int wallHitsToSpawnRedirect = 3;
     private int wallHitCount = 0;
-    private float velocity;
+    
 
     // State
     Vector2 paddleToBallVector;
@@ -24,11 +29,6 @@ public class Ball : MonoBehaviour
     Rigidbody2D myRigidBody2D;
     GameSession myGameSession;
 
-    //private void ShowDebugInfo()
-    //{
-    //    Debug.Log("Ball velocity: " + myRigidBody2D.velocity.magnitude);
-    //}
-
     // Start is called before the first frame update
     void Start()
     {
@@ -36,24 +36,41 @@ public class Ball : MonoBehaviour
         myAudioSource = GetComponent<AudioSource>();
         myRigidBody2D = GetComponent<Rigidbody2D>();
         myGameSession = FindObjectOfType<GameSession>();
-        velocity = pushVector.magnitude;
+        pushVectorSmudge = Instantiate(pushVectorSmudge, transform.position + new Vector3(pushVectorSmudgeOffset.x, pushVectorSmudgeOffset.y, -5f), transform.rotation);
+        pushVectorSmudge.transform.parent = transform; 
     }
 
     // Update is called once per frame
     void Update()
     {
+        transform.Rotate(Vector3.forward, rotationSpeed * Time.deltaTime);
         if (!hasStarted)
         {
             LockBallToPaddle();
             LaunchOnMouseClick();
+            MakePushVectorStatic();
         }
+    }
+
+    private void MakePushVectorStatic()
+    {
+        pushVectorSmudge.transform.RotateAround(transform.position, Vector3.forward, -rotationSpeed * Time.deltaTime);
     }
 
     private void FixedUpdate()
     {
-        myRigidBody2D.angularVelocity = rotationSpeed;
-        //FixBallVelocity(); not optimal solution for constant velocity or is it?
+        if (!hasStarted)
+        {
+            PeriodicPushVectorRotate();
+        }
     }
+
+    private void PeriodicPushVectorRotate()
+    {
+        pushVectorSmudge.transform.RotateAround(transform.position, Vector3.forward, periodicRotateAmplitude * Mathf.Sin(periodicRotateFrequency * Time.timeSinceLevelLoad + Mathf.PI / 2));
+        pushVector = Redirect.RotateVector2(pushVector, periodicRotateAmplitude * Mathf.Deg2Rad * Mathf.Sin(periodicRotateFrequency * Time.timeSinceLevelLoad + Mathf.PI / 2));
+    }
+
     private void FixBallVelocity()
     {
         myRigidBody2D.velocity = myRigidBody2D.velocity.normalized * velocity;
@@ -63,9 +80,10 @@ public class Ball : MonoBehaviour
     {
         if(Input.GetMouseButtonDown(0))
         {
-            myRigidBody2D.velocity = new Vector2(pushVector.x, pushVector.y);
+            myRigidBody2D.velocity = pushVector * velocity;
             hasStarted = true;
-            //InvokeRepeating("ShowDebugInfo", 1f, 0.2f); // Checking ball movement every second
+            pushVectorSmudge.SetActive(false);
+            Destroy(pushVectorSmudge);
         }
     }
 
@@ -104,7 +122,6 @@ public class Ball : MonoBehaviour
             wallHitCount = 0;
         }
     }
-
     private void CheckBallMovement()
     {
         if (wallHitCount >= wallHitsToSpawnRedirect && myRigidBody2D.velocity.y < myGameSession.GetMinimumBallSpeedPerUnit())
