@@ -5,10 +5,11 @@ using UnityEngine;
 public class Paddle : MonoBehaviour
 {
     // Configuration vars
+    [Header("Measurements")]
     [SerializeField] float screenWidthInUnits = 16f;
+    [SerializeField] float paddleWidthInUnits = 4f;
     float minX = 2f;
     float maxX = 14f;
-    [SerializeField] float paddleWidthInUnits = 4f;
 
     // Cached references
     GameSession myGameSession;
@@ -29,19 +30,37 @@ public class Paddle : MonoBehaviour
         Vector2 paddlePos;
         if (myGameSession.isAutoPlayEnabled() == false)
         {
-            float gameWidthInPixels = 4 * (float)Screen.height / 3;
-            float xB = ((float)Screen.width - gameWidthInPixels) / 2;
-            float mousePosInUnits = (Input.mousePosition.x - xB) / gameWidthInPixels * screenWidthInUnits;
-            paddlePos = new Vector2(mousePosInUnits, transform.position.y);
-            transform.position = paddlePos;
+            paddlePos = HandlePlayerInput();
         }
         else
         {
-            Vector2 ballPos = ball.transform.position;
-            paddlePos = new Vector2(ballPos.x, transform.position.y);
-            paddlePos.x += 0.5f * Mathf.Sin(5*Time.time);
+            paddlePos = HandleAutoPlay();
         }
         paddlePos.x = Mathf.Clamp(paddlePos.x, minX, maxX);
         transform.position = paddlePos;
+    }
+
+    private Vector2 HandlePlayerInput()
+    {
+        Vector2 paddlePos = new Vector2(GetMouseHorizontalPosInUnits(), transform.position.y);
+        transform.position = paddlePos;
+        return paddlePos;
+    }
+
+    private Vector2 HandleAutoPlay()
+    {
+        Vector2 paddlePos;
+        Vector2 ballPos = ball.transform.position;
+        paddlePos = new Vector2(ballPos.x, transform.position.y);
+        paddlePos.x += 0.5f * Mathf.Sin(5 * Time.time);
+        return paddlePos;
+    }
+
+    private float GetMouseHorizontalPosInUnits()
+    {
+        float gameWidthInPixels = 4 * (float)Screen.height / 3;
+        float xB = ((float)Screen.width - gameWidthInPixels) / 2;
+        float mousePosInUnits = (Input.mousePosition.x - xB) / gameWidthInPixels * screenWidthInUnits;
+        return mousePosInUnits;
     }
 }

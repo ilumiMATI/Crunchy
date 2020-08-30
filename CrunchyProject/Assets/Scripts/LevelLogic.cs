@@ -23,6 +23,8 @@ public class LevelLogic : MonoBehaviour
     {
         --breakableBlocks;
         if (breakableBlocks == 0)
+        {
             sceneLoader.LoadNextScene();
+        }
     }
 }

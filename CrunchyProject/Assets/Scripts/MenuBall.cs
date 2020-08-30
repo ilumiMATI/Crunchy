@@ -5,10 +5,13 @@ using UnityEngine;
 public class MenuBall : MonoBehaviour
 {
     // Configuration variables
-    [SerializeField] float speed;
+    [Header("Movement")]
+    [SerializeField] float velocity;
     [SerializeField] float rotationSpeed = 180f;
-    [SerializeField] AudioClip[] ballClips;
     [SerializeField] float randomBounceFactor = 0f;
+    [Header("Audio")]
+    [SerializeField] AudioClip[] ballClips;
+    
 
     // Cached Component references
     AudioSource myAudioSource;
@@ -17,29 +20,45 @@ public class MenuBall : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Setting up refs
         myAudioSource = GetComponent<AudioSource>();
         myRigidBody2D = GetComponent<Rigidbody2D>();
-        Vector2 randomDirection = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
-        myRigidBody2D.velocity = randomDirection.normalized * speed;
+
+        // Pre-action setup
+        SetRandomVelocityDirection();
     }
 
     // Update is called once per frame
     void Update()
     {
-    }
-
-    private void FixedUpdate()
-    {
-        myRigidBody2D.angularVelocity = rotationSpeed;
+        // Visual rotate effect
+        transform.Rotate(Vector3.forward, rotationSpeed * Time.deltaTime);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Vector2 velocityRandomizedAddon = new Vector2(Random.Range(-randomBounceFactor, randomBounceFactor), Random.Range(-randomBounceFactor, randomBounceFactor));
+        PlayRandomAudioClip();
+        RandomizeVelocity();
+    }
 
-        AudioClip clip = ballClips[Random.Range(0, ballClips.Length)];
-        myAudioSource.PlayOneShot(clip);
+    private void SetRandomVelocityDirection()
+    {
+        Vector2 randomDirection = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
+        myRigidBody2D.velocity = randomDirection.normalized * velocity;
+    }
+
+    private void RandomizeVelocity()
+    {
+        Vector2 velocityRandomizedAddon = new Vector2(
+            Random.Range(-randomBounceFactor, randomBounceFactor),
+            Random.Range(-randomBounceFactor, randomBounceFactor));
+
         myRigidBody2D.velocity += velocityRandomizedAddon;
     }
 
+    private void PlayRandomAudioClip()
+    {
+        AudioClip clip = ballClips[Random.Range(0, ballClips.Length)];
+        myAudioSource.PlayOneShot(clip);
+    }
 }

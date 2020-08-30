@@ -6,14 +6,20 @@ using TMPro;
 public class GameSession : MonoBehaviour
 {
     // config parameters
+    [Header("Movement")]
     [Range(0.25f,4)][SerializeField] float gameSpeed = 1f;
-    [SerializeField] int pointsPerBlockDestroyed = 50;
-    [SerializeField] TextMeshProUGUI scoreText;
-    [SerializeField] bool autoPlay = false;
     [SerializeField] float minBallSpeedPerUnit = 2f;
 
+    [Header("Score")]
+    [SerializeField] int pointsPerBlockDestroyed = 50;
+    [SerializeField] TextMeshProUGUI scoreText;
+
+    [Header("Testing")]
+    [SerializeField] bool autoPlay = false;
+    
+
     // state varables
-    [SerializeField] int currentScore = 0;
+    private int currentScore = 0;
 
     private void Awake()
     {

@@ -6,7 +6,10 @@ using UnityEngine;
 public class Block : MonoBehaviour
 {
     // Configuration variables
+    [Header("Audio")]
     [SerializeField] AudioClip breakClip;
+
+    [Header("Breaking")]
     [SerializeField] GameObject blockParticlesVFX;
     [SerializeField] Sprite[] hitSprites;
 
@@ -15,7 +18,7 @@ public class Block : MonoBehaviour
     GameSession gameStatus;
 
     // State vars
-    [SerializeField] int currentHits = 0; // remove serialised (debug)
+    private int currentHits = 0; 
 
     void Start()
     {

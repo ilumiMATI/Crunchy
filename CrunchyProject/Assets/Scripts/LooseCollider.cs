@@ -12,7 +12,6 @@ public class LooseCollider : MonoBehaviour
     {
         sceneLoader = FindObjectOfType<SceneLoader>();
     }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         sceneLoader.LoadGameOverScene();
