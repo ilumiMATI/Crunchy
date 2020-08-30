@@ -138,6 +138,8 @@ MonoBehaviour:
   paddle: {fileID: 0}
   velocity: 8
   pushVectorSmudge: {fileID: 1545872254178318615, guid: 75ee90e837864ba4eb5cecda6d04472b, type: 3}
+  periodicRotateFrequency: 2.25
+  periodicRotateAmplitude: 2.8
   pushVectorSmudgeOffset: {x: 0, y: 1.5}
   rotationSpeed: -360
   ballClips:

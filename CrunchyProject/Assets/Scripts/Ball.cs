@@ -9,6 +9,8 @@ public class Ball : MonoBehaviour
     private Vector2 pushVector = Vector2.up;
     [SerializeField] float velocity;
     [SerializeField] GameObject pushVectorSmudge;
+    [SerializeField] float periodicRotateFrequency = 1f;
+    [SerializeField] float periodicRotateAmplitude = 1f;
     [SerializeField] Vector2 pushVectorSmudgeOffset;
     [SerializeField] float rotationSpeed = 180f;
     [SerializeField] AudioClip[] ballClips;
@@ -34,7 +36,7 @@ public class Ball : MonoBehaviour
         myAudioSource = GetComponent<AudioSource>();
         myRigidBody2D = GetComponent<Rigidbody2D>();
         myGameSession = FindObjectOfType<GameSession>();
-        pushVectorSmudge = Instantiate(pushVectorSmudge, transform.position + new Vector3(pushVectorSmudgeOffset.x,pushVectorSmudgeOffset.y), transform.rotation);
+        pushVectorSmudge = Instantiate(pushVectorSmudge, transform.position + new Vector3(pushVectorSmudgeOffset.x, pushVectorSmudgeOffset.y, -5f), transform.rotation);
         pushVectorSmudge.transform.parent = transform; 
     }
 
@@ -46,20 +48,29 @@ public class Ball : MonoBehaviour
         {
             LockBallToPaddle();
             LaunchOnMouseClick();
-            HandlePushVector();
+            MakePushVectorStatic();
         }
     }
 
-    private void HandlePushVector()
+    private void MakePushVectorStatic()
     {
-        pushVectorSmudge.transform.RotateAround(transform.position, Vector3.forward, -rotationSpeed * Time.deltaTime + 60f * Time.deltaTime);
-        pushVector = Redirect.RotateVector2(pushVector, 60f * Mathf.Deg2Rad * Time.deltaTime);
+        pushVectorSmudge.transform.RotateAround(transform.position, Vector3.forward, -rotationSpeed * Time.deltaTime);
     }
 
     private void FixedUpdate()
     {
-        
+        if (!hasStarted)
+        {
+            PeriodicPushVectorRotate();
+        }
     }
+
+    private void PeriodicPushVectorRotate()
+    {
+        pushVectorSmudge.transform.RotateAround(transform.position, Vector3.forward, periodicRotateAmplitude * Mathf.Sin(periodicRotateFrequency * Time.timeSinceLevelLoad + Mathf.PI / 2));
+        pushVector = Redirect.RotateVector2(pushVector, periodicRotateAmplitude * Mathf.Deg2Rad * Mathf.Sin(periodicRotateFrequency * Time.timeSinceLevelLoad + Mathf.PI / 2));
+    }
+
     private void FixBallVelocity()
     {
         myRigidBody2D.velocity = myRigidBody2D.velocity.normalized * velocity;
@@ -72,6 +83,7 @@ public class Ball : MonoBehaviour
             myRigidBody2D.velocity = pushVector * velocity;
             hasStarted = true;
             pushVectorSmudge.SetActive(false);
+            Destroy(pushVectorSmudge);
         }
     }
 
