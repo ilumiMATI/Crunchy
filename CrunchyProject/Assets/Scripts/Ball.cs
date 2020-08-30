@@ -7,9 +7,15 @@ public class Ball : MonoBehaviour
     // Configuration variables
     [SerializeField] Paddle paddle;
     [SerializeField] Vector2 pushVector;
+    [SerializeField] GameObject pushVectorSmudge;
+    [SerializeField] Vector2 pushVectorSmudgeOffset;
+
     [SerializeField] float rotationSpeed = 180f;
+
     [SerializeField] AudioClip[] ballClips;
+
     [SerializeField] float randomBounceFactor = 0f;
+
     [SerializeField] GameObject redirectObject;
     [SerializeField] int wallHitsToSpawnRedirect = 3;
     private int wallHitCount = 0;
@@ -37,6 +43,7 @@ public class Ball : MonoBehaviour
         myRigidBody2D = GetComponent<Rigidbody2D>();
         myGameSession = FindObjectOfType<GameSession>();
         velocity = pushVector.magnitude;
+        pushVectorSmudge = Instantiate(pushVectorSmudge, transform.position + new Vector3(pushVectorSmudgeOffset.x,pushVectorSmudgeOffset.y), transform.rotation);
     }
 
     // Update is called once per frame
@@ -46,6 +53,7 @@ public class Ball : MonoBehaviour
         {
             LockBallToPaddle();
             LaunchOnMouseClick();
+            pushVectorSmudge.transform.position = new Vector2(transform.position.x, pushVectorSmudge.transform.position.y);
         }
     }
 
@@ -66,6 +74,7 @@ public class Ball : MonoBehaviour
             myRigidBody2D.velocity = new Vector2(pushVector.x, pushVector.y);
             hasStarted = true;
             //InvokeRepeating("ShowDebugInfo", 1f, 0.2f); // Checking ball movement every second
+            pushVectorSmudge.SetActive(false);
         }
     }
 
