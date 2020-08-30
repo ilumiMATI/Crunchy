@@ -231,10 +231,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c3b2b8c4c6168149abf4196eec7afb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 15
+  velocity: 10
   rotationSpeed: -360
+  randomBounceFactor: 3
   ballClips:
   - {fileID: 8300000, guid: 576e65ef2cc97924b967ea82cfa06ba4, type: 3}
   - {fileID: 8300000, guid: 52069473b3cba594da653c246d362a6d, type: 3}
   - {fileID: 8300000, guid: af1f4f8c28e42c043b26ae9052b1f130, type: 3}
-  randomBounceFactor: 3
